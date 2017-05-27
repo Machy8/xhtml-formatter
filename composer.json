@@ -1,0 +1,24 @@
+{
+    "name": "machy8/xhtml-formatter",
+    "description": "Simple, lightweight a bit customizable (X)HTML and XML formatter.",
+    "keywords": ["xhtml", "html", "xml", "formatter", "beautifier"],
+    "license": "New BSD License",
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "tracy/tracy": "^2.4",
+        "nette/tester": "^1.7"
+    },
+    "authors": [
+        {
+            "name": "Vladimír Macháček",
+            "email": "8machy@seznam.cz"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "XhtmlFormatter": ""
+        }
+    }
+}
