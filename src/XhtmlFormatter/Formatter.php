@@ -32,16 +32,13 @@ class Formatter
 		TOKEN_CLOSE_TAG = 'closeTag',
 		TOKEN_TEXT = 'text',
 
-		OPEN_TAG_RE = '/<(?!\/)(?<element>[-\w]+)(?:[^>]+)?\/?>/',
+		OPEN_TAG_RE = '/<(?!\/)(?<element>[\-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
-		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/';
+		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
 
-	private $additionalTags = [
-		self::CONTENT_XML => [
-			'open' => ['<?'],
-			'close' => ['?>']
-		]
-	];
+		HTML_ATTRIBUTE_RE = '[\w:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)',
+		PHP_CODE_RE = '\<\?php .*\?\>',
+		FORMATTER_OFF_RE = '\<formatter-off\>.*\<\/formatter-off\>';
 
 	/**
 	 * @var string
@@ -81,6 +78,11 @@ class Formatter
 	/**
 	 * @var array
 	 */
+	private $codePlaceholders = [];
+
+	/**
+	 * @var array
+	 */
 	private $unpairedElements = [
 		self::CONTENT_HTML => [
 			'area', 'base', 'br', 'code', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source',
@@ -95,23 +97,6 @@ class Formatter
 	 * @var bool
 	 */
 	private $xmlSyntax = FALSE;
-
-
-	public function addAdditionalTags(array $openTags, array $closeTags, string $contentType = NULL): self
-	{
-		if ($contentType === self::CONTENT_XHTML) {
-			$contentType = self::CONTENT_HTML;
-		}
-
-		$contentType = $contentType ?? self::CONTENT_HTML;
-		$additionalOpenTags = $this->additionalTags[$contentType]['open'];
-		$additionalCloseTags = $this->additionalTags[$contentType]['close'];
-
-		$this->additionalTags[$contentType]['open'] = array_merge($additionalOpenTags, $openTags);
-		$this->additionalTags[$contentType]['close'] = array_merge($additionalCloseTags, $closeTags);
-
-		return $this;
-	}
 
 
 	public function addUnpairedElements(string $elements, string $contentType = NULL): self
@@ -134,6 +119,9 @@ class Formatter
 		$this->outputIndentationUnit = $this->outputIndentationMethod === self::TABS_INDENTATION
 			? "\t"
 			: str_repeat(' ', $this->outputIndentationSize);
+
+		$string = $this->setPlaceholders($string);
+
 		$tokens = preg_split(
 			self::PREG_SPLIT_RE, $string, -1,
 			PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY
@@ -144,12 +132,40 @@ class Formatter
 		}
 
 		$output = str_replace("\n\n", "\n", $this->output);
+		$output = $this->unsetPlaceholders($output);
 
 		if ( ! preg_match("/\n$/", $output)) {
 			$output .= "\n";
 		}
 
 		return $output;
+	}
+
+
+	private function unsetPlaceholders(string $string): string
+	{
+		foreach($this->codePlaceholders as $codePlaceholderId => $code) {
+			$string = str_replace('codePlaceholder_' . $codePlaceholderId, $code, $string);
+		}
+
+		$this->codePlaceholders = [];
+		return $string;
+	}
+
+
+	private function setPlaceholders(string $string): string
+	{
+		$re = '/' . implode('|', [self::FORMATTER_OFF_RE, self::HTML_ATTRIBUTE_RE, self::PHP_CODE_RE]) . '/Um';
+		preg_match_all($re, $string, $matches);
+
+		foreach ($matches[0] as $key => $match) {
+			$placeholderId = uniqid();
+
+			$string = preg_replace('/' . preg_quote($match, '/') . '/', 'codePlaceholder_' . $placeholderId, $string, 1);
+			$this->codePlaceholders[$placeholderId] = $match;
+		}
+
+		return $string;
 	}
 
 
@@ -240,23 +256,13 @@ class Formatter
 
 	private function matchCloseTag(string $string): bool
 	{
-		$additionalTags = isset($this->additionalTags[$this->contentType]['close'])
-			? join('|', $this->additionalTags[$this->contentType]['close'])
-			: NULL;
-
-		return $additionalTags && preg_match('/' . $additionalTags . '/', $string)
-			|| preg_match(self::CLOSE_TAG_RE, $string);
+		return (bool) preg_match(self::CLOSE_TAG_RE, $string);
 	}
 
 
 	private function matchOpenTag(string $string, array &$matches = NULL): bool
 	{
-		$additionalTags = isset($this->additionalTags[$this->contentType]['open'])
-			? join('|', $this->additionalTags[$this->contentType]['open'])
-			: NULL;
-
-		return $additionalTags && preg_match('/(?:' . $additionalTags . ')(?<element>[-_\w]+)/', $string, $matches)
-			|| preg_match(self::OPEN_TAG_RE, $string, $matches);
+		return (bool) preg_match(self::OPEN_TAG_RE, $string, $matches);
 	}
 
 }
