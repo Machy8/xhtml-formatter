@@ -1,0 +1,4 @@
+<a href="{plink :Article:Front:Article:detail $article->getId()}">{$article->getTitle()}
+</a>
+<div n:if="$valueA >= $valueB">{foreach $something as $SomethingSomethingSomethingDarkSide}	{$SomethingSomethingSomethingDarkSide}{/foreach}
+</div>

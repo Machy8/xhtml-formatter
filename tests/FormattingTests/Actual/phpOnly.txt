@@ -1,0 +1,27 @@
+<?php
+	ob_start();
+
+	function test ()
+	{
+		require "helloWorld.latte";
+	}
+
+	ob_end_clean();
+
+	register_shutdown_function('test');
+
+	class Test
+	{
+		public function __construct ()
+		{
+			register_shutdown_function([$this, 'helloWorld']);
+		}
+
+		public function helloWorld ()
+		{
+			ob_start();
+			require "helloWorld.latte";
+			ob_end_clean();
+		}
+	}
+?>

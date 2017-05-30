@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+    <channel>
+        <title>Xhtml formatter</title>
+        <link>https://github.com/Machy8/Xhtml-formatter</link>
+        <description>Simple, lightweight a bit customizable (X)HTML and XML formatter.</description>
+        <item>
+            <title>Xhtml formatter used by Macdom html preprocessor</title>
+            <link>https://github.com/Machy8/Macdom</link>
+            <description>Xhtml formatter is used by Macdom html preprocessor.</description>
+        </item>
+    </channel>
+
+</rss>
