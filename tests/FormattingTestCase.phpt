@@ -27,15 +27,15 @@ class FormattingTestCase extends AbstractTestCase
 	}
 
 
-	public function testPhpOnlyFileFormatting()
-	{
-		$this->assertMatchFile('phpOnly');
-	}
-
-
 	public function testLatteFileFormatting()
 	{
 		$this->assertMatchFile('latte');
+	}
+
+
+	public function testPhpOnlyFileFormatting()
+	{
+		$this->assertMatchFile('phpOnly');
 	}
 
 

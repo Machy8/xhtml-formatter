@@ -41,6 +41,11 @@ class Formatter
 		FORMATTER_OFF_RE = '\<formatter-off\>.*\<\/formatter-off\>';
 
 	/**
+	 * @var array
+	 */
+	private $codePlaceholders = [];
+
+	/**
 	 * @var string
 	 */
 	private $contentType = self::CONTENT_HTML;
@@ -74,11 +79,6 @@ class Formatter
 	 * @var string
 	 */
 	private $previousTokenType;
-
-	/**
-	 * @var array
-	 */
-	private $codePlaceholders = [];
 
 	/**
 	 * @var array
@@ -139,33 +139,6 @@ class Formatter
 		}
 
 		return $output;
-	}
-
-
-	private function unsetPlaceholders(string $string): string
-	{
-		foreach($this->codePlaceholders as $codePlaceholderId => $code) {
-			$string = str_replace('codePlaceholder_' . $codePlaceholderId, $code, $string);
-		}
-
-		$this->codePlaceholders = [];
-		return $string;
-	}
-
-
-	private function setPlaceholders(string $string): string
-	{
-		$re = '/' . implode('|', [self::FORMATTER_OFF_RE, self::HTML_ATTRIBUTE_RE, self::PHP_CODE_RE]) . '/Um';
-		preg_match_all($re, $string, $matches);
-
-		foreach ($matches[0] as $key => $match) {
-			$placeholderId = uniqid();
-
-			$string = preg_replace('/' . preg_quote($match, '/') . '/', 'codePlaceholder_' . $placeholderId, $string, 1);
-			$this->codePlaceholders[$placeholderId] = $match;
-		}
-
-		return $string;
 	}
 
 
@@ -263,6 +236,34 @@ class Formatter
 	private function matchOpenTag(string $string, array &$matches = NULL): bool
 	{
 		return (bool) preg_match(self::OPEN_TAG_RE, $string, $matches);
+	}
+
+
+	private function setPlaceholders(string $string): string
+	{
+		$re = '/' . implode('|', [self::FORMATTER_OFF_RE, self::HTML_ATTRIBUTE_RE, self::PHP_CODE_RE]) . '/Um';
+		preg_match_all($re, $string, $matches);
+
+		foreach ($matches[0] as $key => $match) {
+			$placeholderId = uniqid();
+
+			$string = preg_replace('/' . preg_quote($match, '/') . '/', 'codePlaceholder_' . $placeholderId, $string, 1);
+			$this->codePlaceholders[$placeholderId] = $match;
+		}
+
+		return $string;
+	}
+
+
+	private function unsetPlaceholders(string $string): string
+	{
+		foreach ($this->codePlaceholders as $codePlaceholderId => $code) {
+			$string = str_replace('codePlaceholder_' . $codePlaceholderId, $code, $string);
+		}
+
+		$this->codePlaceholders = [];
+
+		return $string;
 	}
 
 }
