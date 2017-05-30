@@ -11,10 +11,9 @@
  *
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace XhtmlFormatter;
-
 
 class Formatter
 {
@@ -36,9 +35,14 @@ class Formatter
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
 		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
 
-		HTML_ATTRIBUTE_RE = '[\w:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)',
-		PHP_CODE_RE = '\<\?php .*\?\>',
-		FORMATTER_OFF_RE = '\<formatter-off\>.*\<\/formatter-off\>';
+		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
+		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
+		CODE_PLACEHOLDERS_RES = [
+			'/<formatter-off>(?:.|\n)*<\/formatter-off>/Um', // special formatter tag
+			'/<\?php (?:.|\n)*\?>/Um', // php code
+			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
+			'/<(?:script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:script|style)>/Um', // skipped elements
+		];
 
 	/**
 	 * @var array
@@ -241,14 +245,14 @@ class Formatter
 
 	private function setPlaceholders(string $string): string
 	{
-		$re = '/' . implode('|', [self::FORMATTER_OFF_RE, self::HTML_ATTRIBUTE_RE, self::PHP_CODE_RE]) . '/Um';
-		preg_match_all($re, $string, $matches);
+		foreach (self::CODE_PLACEHOLDERS_RES as $codePlaceholderRe) {
+			preg_match_all($codePlaceholderRe, $string, $matches);
 
-		foreach ($matches[0] as $key => $match) {
-			$placeholderId = uniqid();
-
-			$string = preg_replace('/' . preg_quote($match, '/') . '/', 'codePlaceholder_' . $placeholderId, $string, 1);
-			$this->codePlaceholders[$placeholderId] = $match;
+			foreach ($matches[0] as $key => $code) {
+				$placeholderId = uniqid();
+				$string = preg_replace('/' . preg_quote($code, '/') . '/', self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string, 1);
+				$this->codePlaceholders[$placeholderId] = $code;
+			}
 		}
 
 		return $string;
@@ -257,8 +261,8 @@ class Formatter
 
 	private function unsetPlaceholders(string $string): string
 	{
-		foreach ($this->codePlaceholders as $codePlaceholderId => $code) {
-			$string = str_replace('codePlaceholder_' . $codePlaceholderId, $code, $string);
+		foreach (array_reverse($this->codePlaceholders) as $codePlaceholderId => $code) {
+			$string = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $string);
 		}
 
 		$this->codePlaceholders = [];

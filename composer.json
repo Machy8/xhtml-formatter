@@ -1,6 +1,6 @@
 {
     "name": "machy8/xhtml-formatter",
-    "description": "Simple, lightweight a bit customizable (X)HTML and XML formatter.",
+    "description": "Simple, lightweight, customizable (X)HTML and XML formatter / beautifier.",
     "keywords": ["xhtml", "html", "xml", "formatter", "beautifier"],
     "license": "New BSD License",
     "require": {

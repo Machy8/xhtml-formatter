@@ -21,6 +21,12 @@ require_once 'bootstrap.php';
 class FormattingTestCase extends AbstractTestCase
 {
 
+	public function testCodePlaceholders()
+	{
+		$this->assertMatchFile('codePlaceholders');
+	}
+
+
 	public function testCompressedFileFormatting()
 	{
 		$this->assertMatchFile('compressed');

@@ -1,6 +1,6 @@
 <?php if ($items): ?>
     <?php $counter = 1 ?><ul><?php foreach ($items as $item): ?>
-        <li id="item-<?php echo $counter++ ?>"><?phpecho htmlSpecialChars(mb_convert_case($item, MB_CASE_TITLE)) ?>
+        <li id="item-<?php echo $counter++ ?>"><?php echo htmlSpecialChars(mb_convert_case($item, MB_CASE_TITLE)) ?>
         </li>
     <?php endforeach ?>
     </ul><?php endif?>
