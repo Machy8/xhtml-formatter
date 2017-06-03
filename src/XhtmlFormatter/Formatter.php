@@ -11,9 +11,10 @@
  *
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace XhtmlFormatter;
+
 
 class Formatter
 {
@@ -31,17 +32,16 @@ class Formatter
 		TOKEN_CLOSE_TAG = 'closeTag',
 		TOKEN_TEXT = 'text',
 
-		OPEN_TAG_RE = '/<(?!\/)(?<element>[\-\w]+)(?:[^>]+)?>/',
+		OPEN_TAG_RE = '/<(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
 		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
 		CODE_PLACEHOLDERS_RES = [
-			'/<formatter-off>(?:.|\n)*<\/formatter-off>/Um', // special formatter tag
 			'/<\?php (?:.|\n)*\?>/Um', // php code
 			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-			'/<(?:script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:script|style)>/Um', // skipped elements
+			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
 		];
 
 	/**
@@ -188,13 +188,23 @@ class Formatter
 
 	private function decreaseIndentation()
 	{
-		$this->outputIndentation = preg_replace("/" . $this->outputIndentationUnit . "/", '', $this->outputIndentation, 1) ?? '';
+		$this->outputIndentation = preg_replace(
+			"/" . $this->outputIndentationUnit . "/",
+			'',
+			$this->outputIndentation,
+			1
+		) ?? '';
 	}
 
 
 	private function formatToken(string $token)
 	{
 		$token = trim($token);
+
+		if ( ! $token) {
+			return;
+		}
+
 		$type = $this->matchTokenType($token);
 		$previousTokenIsOpenTag = $this->previousTokenType === self::TOKEN_OPEN_TAG;
 		$previousTokenIsText = $this->previousTokenType === self::TOKEN_TEXT;
@@ -250,7 +260,12 @@ class Formatter
 
 			foreach ($matches[0] as $key => $code) {
 				$placeholderId = uniqid();
-				$string = preg_replace('/' . preg_quote($code, '/') . '/', self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string, 1);
+				$string = preg_replace(
+					'/' . preg_quote($code, '/') . '/',
+					self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string,
+					1
+				);
+
 				$this->codePlaceholders[$placeholderId] = $code;
 			}
 		}
