@@ -1,0 +1,9 @@
+<paired>
+	<unpaired>
+	<paired></paired>
+	<unpaired>
+	<paired></paired>
+	<unpaired>
+	Some text here
+	<paired></paired>
+</paired>
