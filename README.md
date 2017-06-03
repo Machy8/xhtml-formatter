@@ -1,4 +1,4 @@
-# XML (X)HTML formatter / beautifier
+# XML & (X)HTML formatter / beautifier
 
 [![Build Status](https://travis-ci.org/Machy8/xhtml-formatter.svg?branch=0.1)](https://travis-ci.org/Machy8/xhtml-formatter)
 
