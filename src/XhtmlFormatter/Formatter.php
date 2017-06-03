@@ -39,10 +39,10 @@ class Formatter
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
 		CODE_PLACEHOLDERS_RES = [
-			'/<\?php (?:.|\n)*\?>/Um', // php code
-			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
-		];
+		'/<\?php (?:.|\n)*\?>/Um', // php code
+		'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
+		'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
+	];
 
 	/**
 	 * @var array
@@ -146,23 +146,6 @@ class Formatter
 	}
 
 
-	public function matchTokenType(string $token): string
-	{
-		$type = self::TOKEN_TEXT;
-
-		if ($this->matchOpenTag($token, $matches)) {
-			$type = in_array($matches['element'], $this->unpairedElements[$this->contentType])
-				? self::TOKEN_UNPAIRED_TAG
-				: self::TOKEN_OPEN_TAG;
-
-		} elseif ($this->matchCloseTag($token)) {
-			$type = self::TOKEN_CLOSE_TAG;
-		}
-
-		return $type;
-	}
-
-
 	public function setContentType(string $contentType): self
 	{
 		$this->xmlSyntax = in_array($contentType, [self::CONTENT_XHTML, self::CONTENT_XML], TRUE);
@@ -189,11 +172,11 @@ class Formatter
 	private function decreaseIndentation()
 	{
 		$this->outputIndentation = preg_replace(
-			"/" . $this->outputIndentationUnit . "/",
-			'',
-			$this->outputIndentation,
-			1
-		) ?? '';
+				"/" . $this->outputIndentationUnit . "/",
+				'',
+				$this->outputIndentation,
+				1
+			) ?? '';
 	}
 
 
@@ -250,6 +233,23 @@ class Formatter
 	private function matchOpenTag(string $string, array &$matches = NULL): bool
 	{
 		return (bool) preg_match(self::OPEN_TAG_RE, $string, $matches);
+	}
+
+
+	private function matchTokenType(string $token): string
+	{
+		$type = self::TOKEN_TEXT;
+
+		if ($this->matchOpenTag($token, $matches)) {
+			$type = in_array($matches['element'], $this->unpairedElements[$this->contentType])
+				? self::TOKEN_UNPAIRED_TAG
+				: self::TOKEN_OPEN_TAG;
+
+		} elseif ($this->matchCloseTag($token)) {
+			$type = self::TOKEN_CLOSE_TAG;
+		}
+
+		return $type;
 	}
 
 
