@@ -62,14 +62,13 @@ and if you want to disable formatting
 ````PHP
 $formatter
 
-	// To change the content type from CONTENT_HTML (default) to CONTENT_XML or CONTENT_XHTML
+	// Change the content type from CONTENT_HTML (default) to CONTENT_XML or CONTENT_XHTML
 	->setContentType(Formatter::CONTENT_XML)
 
-	// If you want to add another unpaired element
+	// Add new unpaired element
 	->addUnpairedElement('element', Formatter::CONTENT_XML);
 
-	// If you want to use spaces in output
+	// Indent file by 4 spaces instead of tabs
 	->setSpacesIndentationMethod(4);
 
 ````
-
