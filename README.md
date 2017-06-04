@@ -66,7 +66,7 @@ $formatter
 	->setContentType(Formatter::CONTENT_XML)
 
 	// Add new unpaired element
-	->addUnpairedElement('element', Formatter::CONTENT_XML);
+	->addUnpairedElement('element', Formatter::CONTENT_XML)
 
 	// Indent file by 4 spaces instead of tabs
 	->setSpacesIndentationMethod(4);
