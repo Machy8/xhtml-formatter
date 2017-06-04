@@ -38,11 +38,11 @@ class Formatter
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
-		CODE_PLACEHOLDERS_RES = [
-		'/<\?php (?:.|\n)*\?>/Um', // php code
-		'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-		'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
-	];
+		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
+			'/<\?php (?:.|\n)*\?>/Um', // php code
+			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
+			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
+		];
 
 	/**
 	 * @var array
@@ -135,14 +135,11 @@ class Formatter
 			$this->formatToken($token);
 		}
 
-		$output = str_replace("\n\n", "\n", $this->output);
-		$output = $this->unsetPlaceholders($output);
+		$this->removeBlankLines();
+		$this->unsetPlaceholders();
+		$this->addBlankLine();
 
-		if ( ! preg_match("/\n$/", $output)) {
-			$output .= "\n";
-		}
-
-		return $output;
+		return $this->output;
 	}
 
 
@@ -166,6 +163,14 @@ class Formatter
 		$this->outputIndentationSize = $indentationSize;
 
 		return $this;
+	}
+
+
+	private function addBlankLine()
+	{
+		if ( ! preg_match("/\n$/", $this->output)) {
+			$this->output .= "\n";
+		}
 	}
 
 
@@ -253,9 +258,15 @@ class Formatter
 	}
 
 
+	private function removeBlankLines()
+	{
+		$this->output = str_replace("\n\n", "\n", $this->output);
+	}
+
+
 	private function setPlaceholders(string $string): string
 	{
-		foreach (self::CODE_PLACEHOLDERS_RES as $codePlaceholderRe) {
+		foreach (self::CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS as $codePlaceholderRe) {
 			preg_match_all($codePlaceholderRe, $string, $matches);
 
 			foreach ($matches[0] as $key => $code) {
@@ -274,15 +285,13 @@ class Formatter
 	}
 
 
-	private function unsetPlaceholders(string $string): string
+	private function unsetPlaceholders()
 	{
 		foreach (array_reverse($this->codePlaceholders) as $codePlaceholderId => $code) {
-			$string = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $string);
+			$this->output = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $this->output);
 		}
 
 		$this->codePlaceholders = [];
-
-		return $string;
 	}
 
 }
