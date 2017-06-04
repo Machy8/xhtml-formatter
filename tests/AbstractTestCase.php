@@ -2,9 +2,9 @@
 
 /**
  *
- * This file is part of the Macdom
+ * This file is part of the Xhtml-formatter
  *
- * Copyright (c) 2015-2017 Vladimír Macháček
+ * Copyright (c) 2017 Vladimír Macháček
  *
  * For the full copyright and license information, please view the file license.md
  * that was distributed with this source code.

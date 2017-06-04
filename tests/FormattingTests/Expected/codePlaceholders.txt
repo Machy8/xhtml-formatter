@@ -1,0 +1,16 @@
+<formatter-off>
+	<div></div><div></div><div></div>
+	<?php echo 'HelloWorld' ?><div></div>
+</formatter-off>
+<style>
+		<div></div><div></div><div></div>
+    	<?php echo 'HelloWorld' ?><div></div>
+</style>
+<script>
+		<div></div><div></div><div></div>
+    	<?php echo 'HelloWorld' ?><div></div>
+</script>
+<div data-math="10 > 5"></div>
+<div data-math='10 > 5'></div>
+<div id=article_{$article->getId()} ></div>
+<div class="<?php echo $classes ?>"></div>

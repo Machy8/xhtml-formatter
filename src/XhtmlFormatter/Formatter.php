@@ -2,7 +2,7 @@
 
 /**
  *
- * This file is part of the Xhtml formatter
+ * This file is part of the Xhtml-formatter
  *
  * Copyright (c) 2017 Vladimír Macháček
  *
@@ -32,13 +32,22 @@ class Formatter
 		TOKEN_CLOSE_TAG = 'closeTag',
 		TOKEN_TEXT = 'text',
 
-		OPEN_TAG_RE = '/<(?!\/)(?<element>[\-\w]+)(?:[^>]+)?>/',
+		OPEN_TAG_RE = '/<(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
 		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
 
-		HTML_ATTRIBUTE_RE = '[\w:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)',
-		PHP_CODE_RE = '\<\?php .*\?\>',
-		FORMATTER_OFF_RE = '\<formatter-off\>.*\<\/formatter-off\>';
+		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
+		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
+		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
+			'/<\?php (?:.|\n)*\?>/Um', // php code
+			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
+			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
+		];
+
+	/**
+	 * @var array
+	 */
+	private $codePlaceholders = [];
 
 	/**
 	 * @var string
@@ -74,11 +83,6 @@ class Formatter
 	 * @var string
 	 */
 	private $previousTokenType;
-
-	/**
-	 * @var array
-	 */
-	private $codePlaceholders = [];
 
 	/**
 	 * @var array
@@ -131,58 +135,11 @@ class Formatter
 			$this->formatToken($token);
 		}
 
-		$output = str_replace("\n\n", "\n", $this->output);
-		$output = $this->unsetPlaceholders($output);
+		$this->removeBlankLines();
+		$this->unsetPlaceholders();
+		$this->addBlankLine();
 
-		if ( ! preg_match("/\n$/", $output)) {
-			$output .= "\n";
-		}
-
-		return $output;
-	}
-
-
-	private function unsetPlaceholders(string $string): string
-	{
-		foreach($this->codePlaceholders as $codePlaceholderId => $code) {
-			$string = str_replace('codePlaceholder_' . $codePlaceholderId, $code, $string);
-		}
-
-		$this->codePlaceholders = [];
-		return $string;
-	}
-
-
-	private function setPlaceholders(string $string): string
-	{
-		$re = '/' . implode('|', [self::FORMATTER_OFF_RE, self::HTML_ATTRIBUTE_RE, self::PHP_CODE_RE]) . '/Um';
-		preg_match_all($re, $string, $matches);
-
-		foreach ($matches[0] as $key => $match) {
-			$placeholderId = uniqid();
-
-			$string = preg_replace('/' . preg_quote($match, '/') . '/', 'codePlaceholder_' . $placeholderId, $string, 1);
-			$this->codePlaceholders[$placeholderId] = $match;
-		}
-
-		return $string;
-	}
-
-
-	public function matchTokenType(string $token): string
-	{
-		$type = self::TOKEN_TEXT;
-
-		if ($this->matchOpenTag($token, $matches)) {
-			$type = in_array($matches['element'], $this->unpairedElements[$this->contentType])
-				? self::TOKEN_UNPAIRED_TAG
-				: self::TOKEN_OPEN_TAG;
-
-		} elseif ($this->matchCloseTag($token)) {
-			$type = self::TOKEN_CLOSE_TAG;
-		}
-
-		return $type;
+		return $this->output;
 	}
 
 
@@ -209,15 +166,33 @@ class Formatter
 	}
 
 
+	private function addBlankLine()
+	{
+		if ( ! preg_match("/\n$/", $this->output)) {
+			$this->output .= "\n";
+		}
+	}
+
+
 	private function decreaseIndentation()
 	{
-		$this->outputIndentation = preg_replace("/" . $this->outputIndentationUnit . "/", '', $this->outputIndentation, 1) ?? '';
+		$this->outputIndentation = preg_replace(
+				"/" . $this->outputIndentationUnit . "/",
+				'',
+				$this->outputIndentation,
+				1
+			) ?? '';
 	}
 
 
 	private function formatToken(string $token)
 	{
 		$token = trim($token);
+
+		if ( ! $token) {
+			return;
+		}
+
 		$type = $this->matchTokenType($token);
 		$previousTokenIsOpenTag = $this->previousTokenType === self::TOKEN_OPEN_TAG;
 		$previousTokenIsText = $this->previousTokenType === self::TOKEN_TEXT;
@@ -263,6 +238,60 @@ class Formatter
 	private function matchOpenTag(string $string, array &$matches = NULL): bool
 	{
 		return (bool) preg_match(self::OPEN_TAG_RE, $string, $matches);
+	}
+
+
+	private function matchTokenType(string $token): string
+	{
+		$type = self::TOKEN_TEXT;
+
+		if ($this->matchOpenTag($token, $matches)) {
+			$type = in_array($matches['element'], $this->unpairedElements[$this->contentType])
+				? self::TOKEN_UNPAIRED_TAG
+				: self::TOKEN_OPEN_TAG;
+
+		} elseif ($this->matchCloseTag($token)) {
+			$type = self::TOKEN_CLOSE_TAG;
+		}
+
+		return $type;
+	}
+
+
+	private function removeBlankLines()
+	{
+		$this->output = str_replace("\n\n", "\n", $this->output);
+	}
+
+
+	private function setPlaceholders(string $string): string
+	{
+		foreach (self::CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS as $codePlaceholderRe) {
+			preg_match_all($codePlaceholderRe, $string, $matches);
+
+			foreach ($matches[0] as $key => $code) {
+				$placeholderId = uniqid();
+				$string = preg_replace(
+					'/' . preg_quote($code, '/') . '/',
+					self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string,
+					1
+				);
+
+				$this->codePlaceholders[$placeholderId] = $code;
+			}
+		}
+
+		return $string;
+	}
+
+
+	private function unsetPlaceholders()
+	{
+		foreach (array_reverse($this->codePlaceholders) as $codePlaceholderId => $code) {
+			$this->output = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $this->output);
+		}
+
+		$this->codePlaceholders = [];
 	}
 
 }

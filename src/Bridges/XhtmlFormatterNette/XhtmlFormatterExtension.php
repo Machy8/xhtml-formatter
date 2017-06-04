@@ -2,7 +2,7 @@
 
 /**
  *
- * This file is part of the Xhtml formatter
+ * This file is part of the Xhtml-formatter
  *
  * Copyright (c) 2017 Vladimír Macháček
  *
@@ -13,7 +13,6 @@
 
 declare(strict_types = 1);
 
-
 namespace XhtmlFormatter\Bridges;
 
 use Nette\DI\CompilerExtension;
@@ -21,6 +20,7 @@ use Nette\DI\CompilerExtension;
 
 class XhtmlFormatterExtension extends CompilerExtension
 {
+
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
@@ -28,4 +28,5 @@ class XhtmlFormatterExtension extends CompilerExtension
 		$builder->addDefinition($this->prefix('formatter'))
 			->setClass('XhtmlFormatter\Formatter');
 	}
+
 }

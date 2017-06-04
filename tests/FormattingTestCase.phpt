@@ -2,7 +2,7 @@
 
 /**
  *
- * This file is part of the Xhtml formatter
+ * This file is part of the Xhtml-formatter
  *
  * Copyright (c) 2017 Vladimír Macháček
  *
@@ -21,21 +21,27 @@ require_once 'bootstrap.php';
 class FormattingTestCase extends AbstractTestCase
 {
 
+	public function testCodePlaceholders()
+	{
+		$this->assertMatchFile('codePlaceholders');
+	}
+
+
 	public function testCompressedFileFormatting()
 	{
 		$this->assertMatchFile('compressed');
 	}
 
 
-	public function testPhpOnlyFileFormatting()
-	{
-		$this->assertMatchFile('phpOnly');
-	}
-
-
 	public function testLatteFileFormatting()
 	{
 		$this->assertMatchFile('latte');
+	}
+
+
+	public function testPhpOnlyFileFormatting()
+	{
+		$this->assertMatchFile('phpOnly');
 	}
 
 

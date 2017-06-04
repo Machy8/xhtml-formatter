@@ -2,7 +2,7 @@
 
 /**
  *
- * This file is part of the Xhtml formatter
+ * This file is part of the Xhtml-formatter
  *
  * Copyright (c) 2017 Vladimír Macháček
  *
@@ -30,7 +30,9 @@ class SetupTestCase extends AbstractTestCase
 
 	public function testUnpairedElementsAddition()
 	{
-		$this->formatter->addUnpairedElements('div');
+		$this->formatter
+			->addUnpairedElements('unpaired', $this->formatter::CONTENT_XML)
+			->setContentType($this->formatter::CONTENT_XML);
 		$this->assertMatchFile('unpairedElementsAddition');
 	}
 
