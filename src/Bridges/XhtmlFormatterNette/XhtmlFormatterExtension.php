@@ -2,7 +2,7 @@
 
 /**
  *
- * This file is part of the Xhtml formatter
+ * This file is part of the Xhtml-formatter
  *
  * Copyright (c) 2017 Vladimír Macháček
  *
