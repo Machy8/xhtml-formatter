@@ -41,7 +41,7 @@ class Formatter
 		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
 			'/<\?php (?:.|\n)*\?>/Um', // php code
 			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
+			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?<toReplace>[\s\S]*?)<\/(?:formatter-off|script|style)>/m', // skipped elements
 		];
 
 	/**
@@ -135,8 +135,8 @@ class Formatter
 			$this->formatToken($token);
 		}
 
-		$this->removeBlankLines();
 		$this->unsetPlaceholders();
+		$this->removeBlankLines();
 		$this->addBlankLine();
 
 		return $this->output;
@@ -210,7 +210,7 @@ class Formatter
 			$this->decreaseIndentation();
 		}
 
-		if ( ! ( ! $this->output && ! $this->previousTokenType || $connectedText || $emptyElement)) {
+		if ( ! ( ! $this->output || ! $this->previousTokenType || $connectedText || $emptyElement)) {
 			$this->output .= "\n";
 		}
 
@@ -260,23 +260,33 @@ class Formatter
 
 	private function removeBlankLines()
 	{
-		$this->output = str_replace("\n\n", "\n", $this->output);
+		$this->output = preg_replace('/\n\s*\n/', "\n", $this->output);
 	}
 
 
 	private function setPlaceholders(string $string): string
 	{
 		foreach (self::CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS as $codePlaceholderRe) {
-			preg_match_all($codePlaceholderRe, $string, $matches);
+			preg_match_all($codePlaceholderRe, $string, $matches, PREG_SET_ORDER);
 
-			foreach ($matches[0] as $key => $code) {
+			foreach ($matches as $match) {
+				if (isset($match['toReplace'])) {
+					$code = $match['toReplace'];
+
+				} else {
+					$code = $match[0];
+				}
+
+				if ( ! trim($code)) {
+					continue;
+				}
+
 				$placeholderId = uniqid();
 				$string = preg_replace(
 					'/' . preg_quote($code, '/') . '/',
 					self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string,
 					1
 				);
-
 				$this->codePlaceholders[$placeholderId] = $code;
 			}
 		}
@@ -287,7 +297,9 @@ class Formatter
 
 	private function unsetPlaceholders()
 	{
-		foreach (array_reverse($this->codePlaceholders) as $codePlaceholderId => $code) {
+		$codePlaceholders = array_reverse($this->codePlaceholders);
+
+		foreach ($codePlaceholders as $codePlaceholderId => $code) {
 			$this->output = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $this->output);
 		}
 
