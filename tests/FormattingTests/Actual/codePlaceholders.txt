@@ -15,5 +15,7 @@
 
 <div data-math="10 > 5"></div>
 <div data-math='10 > 5'></div>
+<style>h1 {color:red;}</style><style>h1 {color:blue;}</style>
 <div id=article_{$article->getId()} ></div>
 <div class="<?php echo $classes ?>"></div>
+Some text and <script script type="text/javascript" src=" somescript.js"></script>

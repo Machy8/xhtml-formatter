@@ -9,14 +9,12 @@ border-color:#336600;
 border-style:solid;
 color:#009900;
 }
-
 table.GeneratedTable td, table.GeneratedTable th {
 border-width:1px;
 border-color:#336600;
 border-style:solid;
 padding:3px;
 }
-
 table.GeneratedTable thead {
 background-color:#CCFF99;
 }
