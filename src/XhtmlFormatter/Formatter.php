@@ -32,9 +32,9 @@ class Formatter
 		TOKEN_CLOSE_TAG = 'closeTag',
 		TOKEN_TEXT = 'text',
 
-		OPEN_TAG_RE = '/<(?<element>[-\w]+)(?:[^>]+)?>/',
+		OPEN_TAG_RE = '/<\??(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
-		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
+		PREG_SPLIT_RE = '/(<(?:\/|\?)?[-\w]+(?:>|.*?>))/',
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
@@ -92,8 +92,9 @@ class Formatter
 			'area', 'base', 'br', 'code', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source',
 			'track', 'wbr'
 		],
+
 		self::CONTENT_XML => [
-			'cloud'
+			'cloud', 'xml'
 		]
 	];
 
@@ -218,7 +219,7 @@ class Formatter
 			$this->decreaseIndentation();
 		}
 
-		if ( ! ( ! $this->output || ! $this->previousTokenType || $connectedText || $emptyElement)) {
+		if ( ! ( ! $this->output || $connectedText || $emptyElement)) {
 			$this->output .= "\n";
 		}
 

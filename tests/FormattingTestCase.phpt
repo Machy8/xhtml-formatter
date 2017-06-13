@@ -53,7 +53,6 @@ class FormattingTestCase extends AbstractTestCase
 
 	public function testUnformattedFileFormatting()
 	{
-		$this->rewriteTest('unformatted');
 		$this->assertMatchFile('unformatted');
 	}
 

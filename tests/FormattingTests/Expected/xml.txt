@@ -23,3 +23,7 @@
 		</item>
 	</channel>
 </rss>
+Some text here
+<?xml?>
+<category></category>
+<channel></channel>
