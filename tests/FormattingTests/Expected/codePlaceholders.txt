@@ -18,7 +18,6 @@
 <style>
 	h1 {color:blue;}
 </style>
-<div id=article_{$article->getId()} ></div>
 <div class="<?php echo $classes ?>"></div>
 Some text and
 <script script type="text/javascript" src=" somescript.js"></script>

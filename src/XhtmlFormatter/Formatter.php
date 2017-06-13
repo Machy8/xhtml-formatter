@@ -40,7 +40,7 @@ class Formatter
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
 		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
 			'/<\?php (?:.|\n)*\?>/Um', // php code
-			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|(\S+))/', // element attribute
+			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|([^ >]*))/', // element attribute
 			'/<(?:formatter-off|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/(?:formatter-off|script|style)>/m', // skipped elements
 		];
 
