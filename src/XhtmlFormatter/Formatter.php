@@ -40,8 +40,8 @@ class Formatter
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
 		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
 			'/<\?php (?:.|\n)*\?>/Um', // php code
-			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?<toReplace>[\s\S]*?)<\/(?:formatter-off|script|style)>/m', // skipped elements
+			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|(\S+))/', // element attribute
+			'/<(?:formatter-off|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/(?:formatter-off|script|style)>/m', // skipped elements
 		];
 
 	/**
@@ -103,10 +103,18 @@ class Formatter
 	private $xmlSyntax = FALSE;
 
 
-	public function addUnpairedElements(string $elements, string $contentType = NULL): self
+	/**
+	 * @param string|array $elements
+	 * @param string|NULL $contentType
+	 * @return Formatter
+	 */
+	public function addUnpairedElements($elements, string $contentType = NULL): self
 	{
+		if (is_string($elements)) {
+			$elements = explode(' ', trim($elements));
+		}
+
 		$contentType = $contentType ?? self::CONTENT_HTML;
-		$elements = explode(' ', trim($elements));
 
 		foreach ($elements as $element) {
 			$this->unpairedElements[$contentType][] = $element;
@@ -270,12 +278,7 @@ class Formatter
 			preg_match_all($codePlaceholderRe, $string, $matches, PREG_SET_ORDER);
 
 			foreach ($matches as $match) {
-				if (isset($match['toReplace'])) {
-					$code = $match['toReplace'];
-
-				} else {
-					$code = $match[0];
-				}
+				$code = end($match);
 
 				if ( ! trim($code)) {
 					continue;
