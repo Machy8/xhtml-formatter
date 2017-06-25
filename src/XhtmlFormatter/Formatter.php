@@ -41,7 +41,7 @@ class Formatter
 		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
 			'/<\?php (?:.|\n)*\?>/Um', // php code
 			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|([^ >]*))/', // element attribute
-			'/<(?:formatter-off|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/(?:formatter-off|script|style)>/m', // skipped elements
+			'/<(formatter-off|code|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/\1>/m', // skipped elements
 		];
 
 	/**
