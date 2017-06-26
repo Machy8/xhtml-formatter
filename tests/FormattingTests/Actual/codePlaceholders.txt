@@ -1,8 +1,3 @@
-<formatter-off>
-	<div></div><div></div><div></div>
-	<?php echo 'HelloWorld' ?><div></div>
-</formatter-off>
-
 <style>
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
@@ -12,6 +7,16 @@
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
 </script>
+
+<div>
+	<div>
+		<formatter-off>
+			div
+				h1 Indented block in macdom
+		</formatter-off>
+	</div>
+</div>
+
 
 <div data-math="10 > 5"></div>
 <div data-math='10 > 5'></div>
