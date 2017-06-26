@@ -35,6 +35,7 @@ class Formatter
 		OPEN_TAG_RE = '/<\??(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
 		PREG_SPLIT_RE = '/(<(?:\/|\?)?[-\w]+(?:>|.*?>))/',
+		FORMATTER_OFF_REMOVE_RE = '/\n*\s*<\/?formatter-off>(?:(?<!<\/formatter-off>)\n)?/m',
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
@@ -306,6 +307,8 @@ class Formatter
 		foreach ($codePlaceholders as $codePlaceholderId => $code) {
 			$this->output = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $this->output);
 		}
+
+		$this->output = preg_replace(self::FORMATTER_OFF_REMOVE_RE, '', $this->output);
 
 		$this->codePlaceholders = [];
 	}
