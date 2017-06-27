@@ -40,7 +40,7 @@ class Formatter
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
 		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
-			'/<\?php (?:.|\n)*\?>/Um', // php code
+			'/<\?php(?: |\n)(?:.|\n)*\?>/Um', // php code
 			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|([^ >]*))/', // element attribute
 			'/<(formatter-off|code|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/\1>/m', // skipped elements
 		];
@@ -202,7 +202,6 @@ class Formatter
 		if ( ! $token) {
 			return;
 		}
-
 		$type = $this->matchTokenType($token);
 		$previousTokenIsOpenTag = $this->previousTokenType === self::TOKEN_OPEN_TAG;
 		$previousTokenIsText = $this->previousTokenType === self::TOKEN_TEXT;
@@ -219,7 +218,8 @@ class Formatter
 		} elseif ($tokenIsCloseTag && ! $previousTokenIsOpenTag) {
 			$this->decreaseIndentation();
 		}
-
+		bdump($token);
+		bdump($type);
 		if ( ! ( ! $this->output || $connectedText || $emptyElement)) {
 			$this->output .= "\n";
 		}
