@@ -218,8 +218,7 @@ class Formatter
 		} elseif ($tokenIsCloseTag && ! $previousTokenIsOpenTag) {
 			$this->decreaseIndentation();
 		}
-		bdump($token);
-		bdump($type);
+
 		if ( ! ( ! $this->output || $connectedText || $emptyElement)) {
 			$this->output .= "\n";
 		}
