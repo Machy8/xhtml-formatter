@@ -2,6 +2,17 @@
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
 </style>
+<unskippedElement>
+	<div></div>
+	<div></div>
+	<div></div>
+	<?php echo 'HelloWorld' ?>
+	<div></div>
+</unskippedElement>
+<script>
+		<div></div><div></div><div></div>
+    	<?php echo 'HelloWorld' ?><div></div>
+</script>
 <script>
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
