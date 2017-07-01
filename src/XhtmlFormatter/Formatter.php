@@ -11,9 +11,10 @@
  *
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace XhtmlFormatter;
+
 
 class Formatter
 {
