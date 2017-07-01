@@ -36,6 +36,15 @@ class SetupTestCase extends AbstractTestCase
 		$this->assertMatchFile('unpairedElementsAddition');
 	}
 
+
+	public function testSkippedElementsAddition()
+	{
+		$this->formatter
+			->addSkippedElement('skipthisarea');
+		$this->assertMatchFile('skippedElementsAddition');
+	}
+
+
 }
 
 run(new SetupTestCase());

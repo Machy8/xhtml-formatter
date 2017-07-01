@@ -67,6 +67,9 @@ $formatter
 
 	// Add new unpaired element
 	->addUnpairedElement('element', Formatter::CONTENT_XML)
+	
+	// Add skipped elements
+	->addSkippedElement('elementA elementB')
 
 	// Indent file by 4 spaces instead of tabs
 	->setSpacesIndentationMethod(4);

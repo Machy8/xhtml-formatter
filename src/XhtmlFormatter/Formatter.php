@@ -32,22 +32,25 @@ class Formatter
 		TOKEN_CLOSE_TAG = 'closeTag',
 		TOKEN_TEXT = 'text',
 
-		OPEN_TAG_RE = '/<(?<element>[-\w]+)(?:[^>]+)?>/',
+		SKIP_TAG = 'formatter-off',
+
+		OPEN_TAG_RE = '/<\??(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
-		PREG_SPLIT_RE = '/(<\/?[-\w]+(?:>|.*?[^?]>))/',
+		PREG_SPLIT_RE = '/(<(?:\/|\?)?[-\w]+(?:>|.*?>))/',
+		FORMATTER_OFF_REMOVE_RE = '/\n*\s*<\/?' . self::SKIP_TAG . '>(?:(?<!<\/' . self::SKIP_TAG . '>)\n)?/m',
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
-		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/',
-		CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS = [
-			'/<\?php (?:.|\n)*\?>/Um', // php code
-			'/[\w\:-]+=(?:"[^"]*"|\'[^\']*\'|\S+)/', // element attribute
-			'/<(?:formatter-off|script|style)([-\w]+)?(?:[^>]+)?>(?:.|\n)*<\/(?:formatter-off|script|style)>/Um', // skipped elements
-		];
+		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/';
 
 	/**
 	 * @var array
 	 */
 	private $codePlaceholders = [];
+
+	/**
+	 * @var array
+	 */
+	private $codePlaceholdersRegularExpressions = [];
 
 	/**
 	 * @var string
@@ -87,13 +90,19 @@ class Formatter
 	/**
 	 * @var array
 	 */
+	private $skippedElements = [self::SKIP_TAG, 'code', 'script', 'style', 'textarea'];
+
+	/**
+	 * @var array
+	 */
 	private $unpairedElements = [
 		self::CONTENT_HTML => [
 			'area', 'base', 'br', 'code', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source',
 			'track', 'wbr'
 		],
+
 		self::CONTENT_XML => [
-			'cloud'
+			'cloud', 'xml'
 		]
 	];
 
@@ -103,10 +112,28 @@ class Formatter
 	private $xmlSyntax = FALSE;
 
 
-	public function addUnpairedElements(string $elements, string $contentType = NULL): self
+	public function addSkippedElement(string $skippedElement): Formatter
 	{
+		$skippedElements = $this->skippedElements;
+		$newSkippedElements = explode(' ', $skippedElement);
+		$this->skippedElements = array_unique(array_merge($skippedElements, $newSkippedElements));
+
+		return $this;
+	}
+
+
+	/**
+	 * @param string|array $elements
+	 * @param string|NULL $contentType
+	 * @return Formatter
+	 */
+	public function addUnpairedElements($elements, string $contentType = NULL): self
+	{
+		if (is_string($elements)) {
+			$elements = explode(' ', trim($elements));
+		}
+
 		$contentType = $contentType ?? self::CONTENT_HTML;
-		$elements = explode(' ', trim($elements));
 
 		foreach ($elements as $element) {
 			$this->unpairedElements[$contentType][] = $element;
@@ -124,7 +151,9 @@ class Formatter
 			? "\t"
 			: str_repeat(' ', $this->outputIndentationSize);
 
-		$string = $this->setPlaceholders($string);
+		$this->setCodePlaceholdersRegularExpressions();
+
+		$string = $this->setCodePlaceholders($string);
 
 		$tokens = preg_split(
 			self::PREG_SPLIT_RE, $string, -1,
@@ -135,8 +164,8 @@ class Formatter
 			$this->formatToken($token);
 		}
 
+		$this->unsetCodePlaceholders();
 		$this->removeBlankLines();
-		$this->unsetPlaceholders();
 		$this->addBlankLine();
 
 		return $this->output;
@@ -210,7 +239,7 @@ class Formatter
 			$this->decreaseIndentation();
 		}
 
-		if ( ! ( ! $this->output && ! $this->previousTokenType || $connectedText || $emptyElement)) {
+		if ( ! ( ! $this->output || $connectedText || $emptyElement)) {
 			$this->output .= "\n";
 		}
 
@@ -260,24 +289,33 @@ class Formatter
 
 	private function removeBlankLines()
 	{
-		$this->output = str_replace("\n\n", "\n", $this->output);
+		$this->output = preg_replace('/\n\s*\n/', "\n", $this->output);
 	}
 
 
-	private function setPlaceholders(string $string): string
+	private function setCodePlaceholders(string $string): string
 	{
-		foreach (self::CODE_PLACEHOLDERS_REGULAR_EXPRESSIONS as $codePlaceholderRe) {
-			preg_match_all($codePlaceholderRe, $string, $matches);
+		foreach ($this->codePlaceholdersRegularExpressions as $codePlaceholderRe) {
+			preg_match_all($codePlaceholderRe, $string, $matches, PREG_SET_ORDER);
 
-			foreach ($matches[0] as $key => $code) {
-				$placeholderId = uniqid();
+			foreach ($matches as $match) {
+				$fullMatch = $match[0];
+				$fullMatchReplacement = $fullMatch;
+				$codeToReplace = end($match);
+
+				if ( ! trim($codeToReplace)) {
+					continue;
+				}
+
+				$codePlaceholder = uniqid(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX);
+				$fullMatchReplacement = str_replace($codeToReplace, $codePlaceholder, $fullMatchReplacement);
 				$string = preg_replace(
-					'/' . preg_quote($code, '/') . '/',
-					self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $placeholderId, $string,
-					1
-				);
+					'/' . preg_quote($fullMatch, '/') . '/',
+					$fullMatchReplacement,
+					$string,
+					1);
 
-				$this->codePlaceholders[$placeholderId] = $code;
+				$this->codePlaceholders[$codePlaceholder] = $codeToReplace;
 			}
 		}
 
@@ -285,11 +323,25 @@ class Formatter
 	}
 
 
-	private function unsetPlaceholders()
+	private function setCodePlaceholdersRegularExpressions()
 	{
-		foreach (array_reverse($this->codePlaceholders) as $codePlaceholderId => $code) {
-			$this->output = str_replace(self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . $codePlaceholderId, $code, $this->output);
+		$this->codePlaceholdersRegularExpressions = [
+			'/<\?php(?: |\n)(?:.|\n)*\?>/Um', // php code
+			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|([^ >]*))/', // element attribute
+			'/<(formatter-off|code|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/\1>/m', // skipped elements
+		];
+	}
+
+
+	private function unsetCodePlaceholders()
+	{
+		$codePlaceholders = array_reverse($this->codePlaceholders);
+
+		foreach ($codePlaceholders as $codePlaceholder => $code) {
+			$this->output = str_replace($codePlaceholder, $code, $this->output);
 		}
+
+		$this->output = preg_replace(self::FORMATTER_OFF_REMOVE_RE, '', $this->output);
 
 		$this->codePlaceholders = [];
 	}

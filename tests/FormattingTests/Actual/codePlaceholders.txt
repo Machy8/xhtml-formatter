@@ -1,19 +1,35 @@
-<formatter-off>
-	<div></div><div></div><div></div>
-	<?php echo 'HelloWorld' ?><div></div>
-</formatter-off>
-
 <style>
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
 </style>
+
+<unskippedElement>
+		<div></div><div></div><div></div>
+    	<?php echo 'HelloWorld' ?><div></div>
+</unskippedElement>
 
 <script>
 		<div></div><div></div><div></div>
     	<?php echo 'HelloWorld' ?><div></div>
 </script>
 
+<script>
+		<div></div><div></div><div></div>
+    	<?php echo 'HelloWorld' ?><div></div>
+</script>
+
+<div>
+	<div>
+		<formatter-off>
+			div
+				h1 Indented block in macdom
+		</formatter-off>
+	</div>
+</div>
+
+
 <div data-math="10 > 5"></div>
 <div data-math='10 > 5'></div>
-<div id=article_{$article->getId()} ></div>
+<style>h1 {color:red;}</style><style>h1 {color:blue;}</style>
 <div class="<?php echo $classes ?>"></div>
+Some text and <script script type="text/javascript" src=" somescript.js"></script>
