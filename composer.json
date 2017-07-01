@@ -17,8 +17,8 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "XhtmlFormatter": ""
+        "psr-4": {
+            "XhtmlFormatter\\": ""
         }
     }
 }
