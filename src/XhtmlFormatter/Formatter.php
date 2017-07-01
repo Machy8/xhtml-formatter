@@ -342,7 +342,6 @@ class Formatter
 		}
 
 		$this->output = preg_replace(self::FORMATTER_OFF_REMOVE_RE, '', $this->output);
-
 		$this->codePlaceholders = [];
 	}
 
