@@ -1,11 +1,5 @@
 <div>
 	<skipthisarea>
-		div
-			div
-				div
-					Alice in Wonderland
-				div
-			div
-		div
+		<div><div><div>Alice in Wonderland</div></div></div>
 	</skipthisarea>
 </div>
