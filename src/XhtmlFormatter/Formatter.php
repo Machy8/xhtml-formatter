@@ -111,12 +111,18 @@ class Formatter
 	 */
 	private $xmlSyntax = FALSE;
 
-
-	public function addSkippedElement(string $skippedElement): Formatter
+	/**
+	 * @param string|array $skippedElement
+	 * @return Formatter
+	 */
+	public function addSkippedElement($skippedElement): Formatter
 	{
+		if (is_string($skippedElement)) {
+			$skippedElement = explode(' ', $skippedElement);
+		}
+
 		$skippedElements = $this->skippedElements;
-		$newSkippedElements = explode(' ', $skippedElement);
-		$this->skippedElements = array_unique(array_merge($skippedElements, $newSkippedElements));
+		$this->skippedElements = array_unique(array_merge($skippedElements, $skippedElement));
 
 		return $this;
 	}
@@ -325,10 +331,12 @@ class Formatter
 
 	private function setCodePlaceholdersRegularExpressions()
 	{
+		$skippedElements = join('|', $this->skippedElements);
+
 		$this->codePlaceholdersRegularExpressions = [
 			'/<\?php(?: |\n)(?:.|\n)*\?>/Um', // php code
 			'/[\w\:-]+=(?:"([^"]*)"|\'([^\']*)\'|([^ >]*))/', // element attribute
-			'/<(formatter-off|code|script|style)(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/\1>/m', // skipped elements
+			'/<(' . $skippedElements . ')(?:[-\w]+)?(?:[^>]+)?>([\s\S]*?)<\/\1>/m', // skipped elements
 		];
 	}
 
