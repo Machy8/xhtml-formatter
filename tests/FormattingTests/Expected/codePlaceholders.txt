@@ -34,3 +34,10 @@
 <div class="<?php echo $classes ?>"></div>
 Some text and
 <script script type="text/javascript" src=" somescript.js"></script>
+<textarea>
+        div
+            div
+                div
+</textarea>
+
+

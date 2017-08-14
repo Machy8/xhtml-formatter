@@ -37,7 +37,7 @@ class Formatter
 		OPEN_TAG_RE = '/<\??(?<element>[-\w]+)(?:[^>]+)?>/',
 		CLOSE_TAG_RE = '/^<\/[^\>]+>/',
 		PREG_SPLIT_RE = '/(<(?:\/|\?)?[-\w]+(?:>|.*?>))/',
-		FORMATTER_OFF_REMOVE_RE = '/\n*\s*<\/?' . self::SKIP_TAG . '>(?:(?<!<\/' . self::SKIP_TAG . '>)\n)?/m',
+		FORMATTER_OFF_REMOVE_RE = '/<\/?' . self::SKIP_TAG . '>(?:(?<!<\/' . self::SKIP_TAG . '>))?/m',
 
 		CODE_PLACEHOLDER_NAMESPACE_PREFIX = 'codePlaceholder_',
 		CODE_PLACEHOLDER_RE = '/' . self::CODE_PLACEHOLDER_NAMESPACE_PREFIX . '\d+/';
