@@ -67,7 +67,7 @@ $formatter
 
 	// Add new unpaired element
 	->addUnpairedElement('element', Formatter::CONTENT_XML)
-	
+
 	// Add skipped elements
 	->addSkippedElement('elementA elementB')
 
