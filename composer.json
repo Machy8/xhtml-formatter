@@ -2,7 +2,7 @@
     "name": "machy8/xhtml-formatter",
     "description": "Simple, lightweight, customizable (X)HTML and XML formatter / beautifier.",
     "keywords": ["xhtml", "html", "xml", "formatter", "beautifier"],
-    "license": "New BSD License",
+    "license": "BSD-3-Clause",
     "require": {
         "php": ">=7.0"
     },
